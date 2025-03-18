@@ -38,13 +38,21 @@ public class LexerGUI extends JFrame {
         int retVal = fileChooser.showOpenDialog(this);
         if (retVal == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
+            // 校验文件类型
+            if (!selectedFile.getName().toLowerCase().endsWith(".c")) {
+                JOptionPane.showMessageDialog(this,
+                        "请选择合法的C语言源文件（扩展名 .c）",
+                        "文件类型错误",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             outputArea.setText("正在分析文件: " + selectedFile.getAbsolutePath() + "\n\n");
-            // 调用词法分析器进行分析，使用新增的 analyzeToString() 方法获取分析结果
             Lexer lexer = new Lexer(selectedFile.getAbsolutePath());
             String result = lexer.analyzeToString();
             outputArea.append(result);
         }
     }
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new LexerGUI().setVisible(true));
