@@ -2,7 +2,6 @@ package group10;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.io.File;
 
 public class LexerGUI extends JFrame {

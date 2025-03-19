@@ -173,12 +173,36 @@ public class Lexer {
         StringBuilder sb = new StringBuilder();
         int tokenLine = line;
         int tokenColumn = column;
+
+        // 读取整数部分
         while (currentChar != -1 && Character.isDigit(currentChar)) {
             sb.append((char) currentChar);
             advance();
         }
+
+        // 检查是否为浮点数：如果当前字符是 '.' 并且后续字符为数字
+        if (currentChar == '.') {
+            int dotLine = line;
+            int dotColumn = column;
+            // 记录当前小数点位置，然后预先读取下一个字符，判断是否为数字
+            advance();
+            if (currentChar != -1 && Character.isDigit(currentChar)) {
+                // 将小数点添加到数字中
+                sb.append('.');
+                // 读取小数部分
+                while (currentChar != -1 && Character.isDigit(currentChar)) {
+                    sb.append((char) currentChar);
+                    advance();
+                }
+            } else {
+                // 允许形如 "1." 作为合法浮点数
+                 sb.append('.');
+            }
+        }
+
         return new Token(TokenType.NUMBER, sb.toString(), tokenLine, tokenColumn);
     }
+
 
     /**
      * 读取操作符或分隔符（例如 + - * / = ; ( ) { } , < > 等）
