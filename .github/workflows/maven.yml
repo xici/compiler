@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 检出代码
+      - name: 签出代码
         uses: actions/checkout@v4.2.2
 
       - name: 设置 JDK
@@ -29,3 +29,4 @@ jobs:
         with:
           name: Lexical-analysis-Group10
           path: target/*.jar
+          retention-days: 7
