@@ -36,6 +36,6 @@ public class Token {
 
     @Override
     public String toString() {
-        return String.format("group10.Token [%s, \"%s\"] at line %d, column %d", type, lexeme, line, column);
+        return String.format("Token [%s, \"%s\"] at line %d, column %d", type, lexeme, line, column);
     }
 }

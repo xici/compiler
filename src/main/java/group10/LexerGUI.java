@@ -10,7 +10,7 @@ public class LexerGUI extends JFrame {
     private JTextArea outputArea;
 
     public LexerGUI() {
-        super("C语言词法分析器 - 图形化界面");
+        super("C语言词法分析器");
 
         openButton = new JButton("选择C源文件");
         outputArea = new JTextArea();
