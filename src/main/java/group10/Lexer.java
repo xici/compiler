@@ -1,12 +1,14 @@
+package group10;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Lexer 类负责整个词法分析过程：
- * 1. 通过 InputHandler 逐字符读取源代码（输入处理模块）
+ * group10.Lexer 类负责整个词法分析过程：
+ * 1. 通过 group10.group10.InputHandler 逐字符读取源代码（输入处理模块）
  * 2. 利用简单的 DFA 逻辑实现词法规则的识别（词法规则解析及 DFA 执行模块）
- * 3. 调用 ErrorHandler 处理扫描过程中遇到的错误（错误处理模块）
+ * 3. 调用 group10.group10.ErrorHandler 处理扫描过程中遇到的错误（错误处理模块）
  */
 public class Lexer {
     private InputHandler input;

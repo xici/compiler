@@ -1,3 +1,5 @@
+package group10;
+
 /**
  * Token类保存词法单元的信息：类型、词素以及位置信息
  */
@@ -34,6 +36,6 @@ public class Token {
 
     @Override
     public String toString() {
-        return String.format("Token [%s, \"%s\"] at line %d, column %d", type, lexeme, line, column);
+        return String.format("group10.Token [%s, \"%s\"] at line %d, column %d", type, lexeme, line, column);
     }
 }

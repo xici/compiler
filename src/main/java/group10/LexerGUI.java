@@ -1,3 +1,5 @@
+package group10;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -31,7 +33,7 @@ public class LexerGUI extends JFrame {
     }
 
     /**
-     * 使用文件选择器选择 C 源文件，然后调用 Lexer 对文件进行词法分析，并将结果显示在文本区中。
+     * 使用文件选择器选择 C 源文件，然后调用 group10.Lexer 对文件进行词法分析，并将结果显示在文本区中。
      */
     private void chooseFileAndAnalyze() {
         JFileChooser fileChooser = new JFileChooser();

@@ -11,7 +11,7 @@ build:
     - "find . -name \"*.java\" > sources.txt"
     - "javac -d out @sources.txt"
     - "echo 'Building JAR package...'"
-    - "echo 'Main-Class: Main' > manifest.txt"
+    - "echo 'group10.Main-Class: group10.Main' > manifest.txt"
     - "jar cfm MyProject.jar manifest.txt -C out ."
   artifacts:
     paths:
