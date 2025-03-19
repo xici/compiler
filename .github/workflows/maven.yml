@@ -19,7 +19,7 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt'
-          cache: maven
+          # cache: maven
 
       - name: 编译并打包
         run: mvn clean package

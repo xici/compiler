@@ -42,6 +42,27 @@ public class Lexer {
                 // 可选：在 token 内容中判断是否包含 "#include"，若是，则后续处理头文件名
                 continue;
             }
+
+            // 在主循环中（例如 analyzeToString() 的 while 循环中）
+            if (currentChar == '/') {
+                int startLine = line;
+                int startColumn = column;
+                advance(); // 跳过 '/'
+                if (currentChar == '/') {
+                    // 单行注释：跳过直到换行
+                    skipSingleLineComment();
+                    continue; // 不生成任何 Token
+                } else if (currentChar == '*') {
+                    // 多行注释：跳过直到遇到 "*/"
+                    skipMultiLineComment();
+                    continue; // 不生成任何 Token
+                } else {
+                    // 不是注释，则 '/' 仍为操作符
+                    tokens.add(new Token(TokenType.OPERATOR, "/", startLine, startColumn));
+                    continue;
+                }
+            }
+
             // 如果遇到字符串字面量
             if (currentChar == '"') {
                 Token token = readStringLiteral();
@@ -49,11 +70,13 @@ public class Lexer {
                 sb.append(token).append("\n");
                 continue;
             }
+
             // 跳过空白字符（空格、换行、制表符等）
             if (Character.isWhitespace(currentChar)) {
                 skipWhitespace();
                 continue;
             }
+
             // 识别标识符或关键字：字母或下划线开头
             if (Character.isLetter(currentChar) || currentChar == '_') {
                 Token token = readIdentifier();
@@ -61,6 +84,7 @@ public class Lexer {
                 sb.append(token).append("\n");
                 continue;
             }
+
             // 识别数字
             if (Character.isDigit(currentChar)) {
                 Token token = readNumber();
@@ -68,6 +92,7 @@ public class Lexer {
                 sb.append(token).append("\n");
                 continue;
             }
+
             // 识别操作符或分隔符
             if (isOperatorOrDelimiter((char) currentChar)) {
                 Token token = readOperatorOrDelimiter();
@@ -75,6 +100,7 @@ public class Lexer {
                 sb.append(token).append("\n");
                 continue;
             }
+
             // 未识别字符，调用错误处理模块
             ErrorHandler.reportError("非法字符: " + (char) currentChar, line, column);
             tokens.add(new Token(TokenType.ERROR, String.valueOf((char) currentChar), line, column));
@@ -161,14 +187,25 @@ public class Lexer {
     private Token readOperatorOrDelimiter() {
         int tokenLine = line;
         int tokenColumn = column;
-        char op = (char) currentChar;
-        advance();
-        if ("+-*/=<>!;(),{}".indexOf(op) != -1) {
-            return new Token(TokenType.OPERATOR, String.valueOf(op), tokenLine, tokenColumn);
+        char ch = (char) currentChar;
+        advance(); // 跳过当前字符
+
+        // 定义分隔符集合，如括号、分号、逗号、大括号等
+        String delimiters = "();,{}[]";
+        // 定义操作符集合，如 +, -, *, /, =, <, >, !, & 等
+        String operators = "+-*/=<>!&|%^~"; // 根据需要扩展
+
+        if (delimiters.indexOf(ch) != -1) {
+            return new Token(TokenType.DELIMITER, String.valueOf(ch), tokenLine, tokenColumn);
+        } else if (operators.indexOf(ch) != -1) {
+            return new Token(TokenType.OPERATOR, String.valueOf(ch), tokenLine, tokenColumn);
+        } else {
+            // 若不属于以上两类，视为错误
+            ErrorHandler.reportError("未知符号: " + ch, tokenLine, tokenColumn);
+            return new Token(TokenType.ERROR, String.valueOf(ch), tokenLine, tokenColumn);
         }
-        ErrorHandler.reportError("未知符号: " + op, tokenLine, tokenColumn);
-        return new Token(TokenType.ERROR, String.valueOf(op), tokenLine, tokenColumn);
     }
+
 
     private Token readPreprocessorDirective() {
         int tokenLine = line;
@@ -243,6 +280,31 @@ public class Lexer {
 
     public void analyze() {
         System.out.println(analyzeToString());
+    }
+
+    private void skipSingleLineComment() {
+        // 继续读取直到遇到换行符或文件结束
+        while (currentChar != -1 && currentChar != '\n') {
+            advance();
+        }
+    }
+
+
+    private void skipMultiLineComment() {
+        // 已经读取到 '*'，现在跳过注释体直到遇到 "*/"
+        advance(); // 跳过 '*' 字符
+        while (currentChar != -1) {
+            if (currentChar == '*') {
+                advance();
+                if (currentChar == '/') {
+                    advance(); // 跳过 '/'
+                    break; // 注释结束
+                }
+            } else {
+                advance();
+            }
+        }
+        // 如果 currentChar == -1 仍未找到 "*/"，可以调用错误处理报告未闭合的注释（可选）
     }
 
 }
