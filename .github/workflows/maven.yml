@@ -2,9 +2,9 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   build:
@@ -25,7 +25,7 @@ jobs:
         run: mvn clean package
 
       - name: 上传构建产物
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
           name: my-java-app
           path: target/*.jar
