@@ -6,17 +6,13 @@ stages:
 build:
   stage: build
   script:
-    - echo "Compiling Java source files..."
-    - mkdir -p out
-    # 将所有 .java 文件列出到 sources.txt 中
-    - find . -name "*.java" > sources.txt
-    # 编译所有源码到 out 目录
-    - javac -d out @sources.txt
-    - echo "Building JAR package..."
-    # 创建一个简单的 manifest 文件，指定入口类 Main（请根据实际情况调整）
-    - echo "Main-Class: Main" > manifest.txt
-    # 将编译结果打包为 jar 文件
-    - jar cfm MyProject.jar manifest.txt -C out .
+    - "echo 'Compiling Java source files...'"
+    - "mkdir -p out"
+    - "find . -name \"*.java\" > sources.txt"
+    - "javac -d out @sources.txt"
+    - "echo 'Building JAR package...'"
+    - "echo 'Main-Class: Main' > manifest.txt"
+    - "jar cfm MyProject.jar manifest.txt -C out ."
   artifacts:
     paths:
       - MyProject.jar
