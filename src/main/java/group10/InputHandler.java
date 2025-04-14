@@ -3,7 +3,7 @@ package group10;
 import java.io.*;
 
 public class InputHandler {
-    private BufferedReader reader;
+    private final BufferedReader reader;
 
     public InputHandler(String filename) throws FileNotFoundException {
         reader = new BufferedReader(new FileReader(filename));

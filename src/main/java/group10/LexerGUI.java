@@ -7,13 +7,12 @@ import java.awt.event.ActionListener;
 import java.io.File;
 
 public class LexerGUI extends JFrame {
-    private JButton openButton;
-    private JTextArea outputArea;
+    private final JTextArea outputArea;
 
     public LexerGUI() {
         super("C语言词法分析器");
 
-        openButton = new JButton("选择C源文件");
+        JButton openButton = new JButton("选择C源文件");
         outputArea = new JTextArea();
         outputArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(outputArea);
@@ -54,10 +53,5 @@ public class LexerGUI extends JFrame {
             String result = lexer.analyzeToString();
             outputArea.append(result);
         }
-    }
-
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new LexerGUI().setVisible(true));
     }
 }
