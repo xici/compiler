@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 
 public class LexerGUI extends JFrame {
     private final JTextArea outputArea;
@@ -17,10 +18,11 @@ public class LexerGUI extends JFrame {
         outputArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(outputArea);
 
-        openButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+        openButton.addActionListener(e -> {
+            try {
                 chooseFileAndAnalyze();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
             }
         });
 
@@ -35,7 +37,7 @@ public class LexerGUI extends JFrame {
     /**
      * 使用文件选择器选择 C 源文件，然后调用 group10.Lexer 对文件进行词法分析，并将结果显示在文本区中。
      */
-    private void chooseFileAndAnalyze() {
+    private void chooseFileAndAnalyze() throws IOException {
         JFileChooser fileChooser = new JFileChooser();
         int retVal = fileChooser.showOpenDialog(this);
         if (retVal == JFileChooser.APPROVE_OPTION) {

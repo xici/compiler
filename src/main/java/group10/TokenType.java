@@ -9,9 +9,10 @@ public enum TokenType {
     NUMBER,
     OPERATOR,
     DELIMITER,
-    STRING,          // 新增：字符串字面量
-    PREPROCESSOR,    // 新增：预处理指令
+    STRING,
+    PREPROCESSOR,
     ERROR,
+    HEADER_FILE,
+    MACRO_NAME,
     EOF
 }
-
