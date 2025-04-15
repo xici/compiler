@@ -1,12 +1,16 @@
 package group10;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class InputHandler {
     private final BufferedReader reader;
 
-    public InputHandler(String filename) throws FileNotFoundException {
-        reader = new BufferedReader(new FileReader(filename));
+    public InputHandler(String filename) throws IOException {
+        // 指定字符编码为 UTF-8
+        reader = new BufferedReader(new InputStreamReader(Files.newInputStream(Paths.get(filename)), StandardCharsets.UTF_8));
     }
 
     /**

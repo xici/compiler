@@ -15,7 +15,7 @@ public class Lexer {
     private int currentChar;
     private int line;
     private int column;
-    private List<Token> tokens;
+//    private List<Token> tokens;
 
     public Lexer(String filename) {
         try {
@@ -23,7 +23,7 @@ public class Lexer {
             line = 1;
             column = 0;
             currentChar = input.getNextChar();
-            tokens = new ArrayList<>();
+            // tokens = new ArrayList<>();
         } catch (IOException e) {
             System.err.println("无法打开文件：" + filename);
         }
@@ -34,11 +34,12 @@ public class Lexer {
      */
     public String analyzeToString() {
         StringBuilder sb = new StringBuilder();
+
         while (currentChar != -1) {
             // 如果遇到预处理指令（#在行首）
             if (currentChar == '#' && column == 0) {
                 Token token = readPreprocessorDirective();
-                tokens.add(token);
+                // tokens.add(token);
                 // 可选：在 token 内容中判断是否包含 "#include"，若是，则后续处理头文件名
                 continue;
             }
@@ -58,7 +59,7 @@ public class Lexer {
                     continue; // 不生成任何 Token
                 } else {
                     // 不是注释，则 '/' 仍为操作符
-                    tokens.add(new Token(TokenType.OPERATOR, "/", startLine, startColumn));
+                    // tokens.add(new Token(TokenType.OPERATOR, "/", startLine, startColumn));
                     continue;
                 }
             }
@@ -66,8 +67,16 @@ public class Lexer {
             // 如果遇到字符串字面量
             if (currentChar == '"') {
                 Token token = readStringLiteral();
-                tokens.add(token);
-                sb.append(token).append("\n");
+                // tokens.add(token);
+                appendTokenToOutput(sb, token);
+                continue;
+            }
+
+            // 处理单引号
+            if (currentChar == '\'') {
+                Token token = readCharLiteral();
+                // tokens.add(token);
+                appendTokenToOutput(sb, token);
                 continue;
             }
 
@@ -80,38 +89,37 @@ public class Lexer {
             // 识别标识符或关键字：字母或下划线开头
             if (Character.isLetter(currentChar) || currentChar == '_') {
                 Token token = readIdentifier();
-                tokens.add(token);
-                sb.append(token).append("\n");
+                // tokens.add(token);
+                appendTokenToOutput(sb, token);
                 continue;
             }
 
             // 识别数字
             if (Character.isDigit(currentChar)) {
                 Token token = readNumber();
-                tokens.add(token);
-                sb.append(token).append("\n");
+                // tokens.add(token);
+                appendTokenToOutput(sb, token);
                 continue;
             }
 
             // 识别操作符或分隔符
             if (isOperatorOrDelimiter((char) currentChar)) {
                 Token token = readOperatorOrDelimiter();
-                tokens.add(token);
-                sb.append(token).append("\n");
+                // tokens.add(token);
+                appendTokenToOutput(sb, token);
                 continue;
             }
 
             // 未识别字符，调用错误处理模块
             ErrorHandler.reportError("非法字符: " + (char) currentChar, line, column);
-            tokens.add(new Token(TokenType.ERROR, String.valueOf((char) currentChar), line, column));
-            sb.append("Error at line ").append(line).append(", column ").append(column)
-                    .append(": ").append((char) currentChar).append("\n");
+            // tokens.add(new Token(TokenType.ERROR, String.valueOf((char) currentChar), line, column));
+            appendTokenToOutput(sb, new Token(TokenType.ERROR, String.valueOf((char) currentChar), line, column));
             advance();
         }
         // 添加文件结束标记
         Token eofToken = new Token(TokenType.EOF, "EOF", line, column);
-        tokens.add(eofToken);
-        sb.append(eofToken).append("\n");
+        // // tokens.add(eofToken);
+        appendTokenToOutput(sb, eofToken);
 
         try {
             input.close();
@@ -122,8 +130,12 @@ public class Lexer {
     }
 
     /**
-     * 读取下一个字符，并更新行列计数
+     * 将 Token 信息添加到输出字符串中，使用格式化输出
      */
+    private void appendTokenToOutput(StringBuilder sb, Token token) {
+        sb.append(String.format("%-20s \t %-20s \t @%d:%d\n", token.getType(), token.getLexeme(), token.getLine(), token.getColumn()));
+    }
+
     private void advance() {
         try {
             if (currentChar == '\n') {
@@ -138,18 +150,12 @@ public class Lexer {
         }
     }
 
-    /**
-     * 跳过所有空白字符
-     */
     private void skipWhitespace() {
         while (currentChar != -1 && Character.isWhitespace(currentChar)) {
             advance();
         }
     }
 
-    /**
-     * 读取标识符或关键字（DFA状态：S0 -> S1）
-     */
     private Token readIdentifier() {
         StringBuilder sb = new StringBuilder();
         int tokenLine = line;
@@ -159,86 +165,67 @@ public class Lexer {
             advance();
         }
         String lexeme = sb.toString();
-        // 简单判断关键字（可根据需要扩展）
         if (lexeme.equals("int") || lexeme.equals("return") || lexeme.equals("if") || lexeme.equals("else")) {
             return new Token(TokenType.KEYWORD, lexeme, tokenLine, tokenColumn);
         }
         return new Token(TokenType.IDENTIFIER, lexeme, tokenLine, tokenColumn);
     }
 
-    /**
-     * 读取数字常量（DFA状态：S0 -> S2）
-     */
     private Token readNumber() {
         StringBuilder sb = new StringBuilder();
         int tokenLine = line;
         int tokenColumn = column;
 
-        // 读取整数部分
         while (currentChar != -1 && Character.isDigit(currentChar)) {
             sb.append((char) currentChar);
             advance();
         }
 
-        // 检查是否为浮点数：如果当前字符是 '.' 并且后续字符为数字
         if (currentChar == '.') {
             int dotLine = line;
             int dotColumn = column;
-            // 记录当前小数点位置，然后预先读取下一个字符，判断是否为数字
             advance();
             if (currentChar != -1 && Character.isDigit(currentChar)) {
-                // 将小数点添加到数字中
                 sb.append('.');
-                // 读取小数部分
                 while (currentChar != -1 && Character.isDigit(currentChar)) {
                     sb.append((char) currentChar);
                     advance();
                 }
             } else {
-                // 允许形如 "1." 作为合法浮点数
-                 sb.append('.');
+                sb.append('.');
             }
         }
 
         return new Token(TokenType.NUMBER, sb.toString(), tokenLine, tokenColumn);
     }
 
-
-    /**
-     * 读取操作符或分隔符（例如 + - * / = ; ( ) { } , < > 等）
-     * 目前仅支持单字符操作符和分隔符，后续可扩展处理多字符情况（如 >=, ==, != 等）
-     */
     private Token readOperatorOrDelimiter() {
         int tokenLine = line;
         int tokenColumn = column;
         char ch = (char) currentChar;
-        advance(); // 跳过当前字符
+        advance();
 
-        // 定义分隔符集合，如括号、分号、逗号、大括号等
-        String delimiters = "();,{}[]";
-        // 定义操作符集合，如 +, -, *, /, =, <, >, !, & 等
-        String operators = "+-*/=<>!&|%^~"; // 根据需要扩展
+        // 更新分隔符集合
+        String delimiters = "();,{}[].'?:&|";
+        // 更新操作符集合
+        String operators = "+-*/=<>!&|%^~";
 
         if (delimiters.indexOf(ch) != -1) {
             return new Token(TokenType.DELIMITER, String.valueOf(ch), tokenLine, tokenColumn);
         } else if (operators.indexOf(ch) != -1) {
             return new Token(TokenType.OPERATOR, String.valueOf(ch), tokenLine, tokenColumn);
         } else {
-            // 若不属于以上两类，视为错误
             ErrorHandler.reportError("未知符号: " + ch, tokenLine, tokenColumn);
             return new Token(TokenType.ERROR, String.valueOf(ch), tokenLine, tokenColumn);
         }
     }
 
-
     private Token readPreprocessorDirective() {
         int tokenLine = line;
         int tokenColumn = column;
         StringBuilder sb = new StringBuilder();
-        // 读取 '#' 本身
         sb.append((char) currentChar);
         advance();
-        // 继续读取直到换行符结束
         while (currentChar != -1 && currentChar != '\n') {
             sb.append((char) currentChar);
             advance();
@@ -250,7 +237,7 @@ public class Lexer {
         int tokenLine = line;
         int tokenColumn = column;
         StringBuilder sb = new StringBuilder();
-        char delimiter = (char) currentChar;  // 应该是 '<' 或 '"'
+        char delimiter = (char) currentChar;
         sb.append(delimiter);
         advance();
         while (currentChar != -1 && (char) currentChar != (delimiter == '<' ? '>' : delimiter)) {
@@ -258,7 +245,7 @@ public class Lexer {
             advance();
         }
         if (currentChar != -1) {
-            sb.append((char) currentChar); // 添加结束符
+            sb.append((char) currentChar);
             advance();
         } else {
             ErrorHandler.reportError("未闭合的头文件名称", tokenLine, tokenColumn);
@@ -270,10 +257,9 @@ public class Lexer {
         int tokenLine = line;
         int tokenColumn = column;
         StringBuilder sb = new StringBuilder();
-        // 跳过起始的双引号
         advance();
         while (currentChar != -1 && (char) currentChar != '"') {
-            if (currentChar == '\\') {  // 处理转义字符
+            if (currentChar == '\\') {
                 sb.append((char) currentChar);
                 advance();
                 if (currentChar != -1) {
@@ -289,17 +275,39 @@ public class Lexer {
             ErrorHandler.reportError("未闭合的字符串字面量", tokenLine, tokenColumn);
             return new Token(TokenType.ERROR, sb.toString(), tokenLine, tokenColumn);
         }
-        // 跳过结束的双引号
         advance();
         return new Token(TokenType.STRING, sb.toString(), tokenLine, tokenColumn);
     }
 
+    // 处理单引号字符
+    private Token readCharLiteral() {
+        int tokenLine = line;
+        int tokenColumn = column;
+        StringBuilder sb = new StringBuilder();
+        advance();
+        while (currentChar != -1 && (char) currentChar != '\'') {
+            if (currentChar == '\\') {
+                sb.append((char) currentChar);
+                advance();
+                if (currentChar != -1) {
+                    sb.append((char) currentChar);
+                    advance();
+                }
+            } else {
+                sb.append((char) currentChar);
+                advance();
+            }
+        }
+        if (currentChar == -1) {
+            ErrorHandler.reportError("未闭合的字符字面量", tokenLine, tokenColumn);
+            return new Token(TokenType.ERROR, sb.toString(), tokenLine, tokenColumn);
+        }
+        advance();
+        return new Token(TokenType.STRING, sb.toString(), tokenLine, tokenColumn);
+    }
 
-    /**
-     * 判断字符是否属于操作符或分隔符集合
-     */
     private boolean isOperatorOrDelimiter(char ch) {
-        return "+-*/=<>!;(),{}".indexOf(ch) != -1;
+        return "+-*/=<>!;(),{}[].'?:&|".indexOf(ch) != -1;
     }
 
     public void analyze() {
@@ -307,28 +315,23 @@ public class Lexer {
     }
 
     private void skipSingleLineComment() {
-        // 继续读取直到遇到换行符或文件结束
         while (currentChar != -1 && currentChar != '\n') {
             advance();
         }
     }
 
-
     private void skipMultiLineComment() {
-        // 已经读取到 '*'，现在跳过注释体直到遇到 "*/"
-        advance(); // 跳过 '*' 字符
+        advance();
         while (currentChar != -1) {
             if (currentChar == '*') {
                 advance();
                 if (currentChar == '/') {
-                    advance(); // 跳过 '/'
-                    break; // 注释结束
+                    advance();
+                    break;
                 }
             } else {
                 advance();
             }
         }
-        // 如果 currentChar == -1 仍未找到 "*/"，可以调用错误处理报告未闭合的注释（可选）
     }
-
 }

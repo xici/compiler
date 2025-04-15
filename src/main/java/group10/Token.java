@@ -4,10 +4,10 @@ package group10;
  * Token类保存词法单元的信息：类型、词素以及位置信息
  */
 public class Token {
-    private TokenType type;
-    private String lexeme;
-    private int line;
-    private int column;
+    private final TokenType type;
+    private final String lexeme;
+    private final int line;
+    private final int column;
 
     public Token(TokenType type, String lexeme, int line, int column) {
         this.type = type;
