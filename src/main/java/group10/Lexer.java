@@ -1,7 +1,15 @@
 package group10;
 
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import lombok.Getter;
 
 /**
  * Lexer (词法分析器) 类负责将 C 语言源代码分解为一系列的 Token。
@@ -26,6 +34,12 @@ public class Lexer {
     private int column;
 
     /**
+     * token 列表
+     */
+    @Getter
+    private static List<Token> tokens;
+
+    /**
      * Lexer 构造函数。
      * 初始化输入处理器，设置初始行号和列号，并读取第一个字符。
      * 
@@ -37,6 +51,7 @@ public class Lexer {
         line = 1;
         column = 0;
         currentChar = input.getNextChar();
+        tokens = new ArrayList<>();
     }
 
     /**
@@ -130,10 +145,20 @@ public class Lexer {
             ErrorHandler.reportError("尝试添加 null Token", line, column);
             return;
         }
-        sb.append(token.getType()).append("\t")
-                .append(token.getLexeme()).append("\t")
-                .append(String.format("@%d:%d\n", token.getLine(), token.getColumn()));
+        // 输出到文本框
+        sb.append(String.format("%-15s\t%-30s\t@%d:%d\n",token.getType(), token.getLexeme(), token.getLine(), token.getColumn()));
+        tokens.add(token);
     }
+
+    public static void writeTokensToJsonFile(List<Token> tokens, String outputPath) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        try (FileWriter writer = new FileWriter(outputPath, StandardCharsets.UTF_8)) {
+            gson.toJson(tokens, writer);
+        } catch (IOException e) {
+            System.err.println("写入 JSON 文件失败: " + e.getMessage());
+        }
+    }
+
 
     /**
      * 读取输入流中的下一个字符，并更新当前行号和列号。

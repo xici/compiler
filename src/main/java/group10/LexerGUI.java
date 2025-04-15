@@ -14,6 +14,7 @@ public class LexerGUI extends JFrame {
         super("C语言词法分析器");
 
         JButton openButton = new JButton("选择C源文件");
+        JButton writeTokens2Json = new JButton("写入Json文件");
         outputArea = new JTextArea();
         outputArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(outputArea);
@@ -26,10 +27,17 @@ public class LexerGUI extends JFrame {
             }
         });
 
+        writeTokens2Json.addActionListener(e -> {
+            Lexer.writeTokensToJsonFile(Lexer.getTokens(),"tokens.json");
+            System.out.println("写入Json完毕");
+        });
+
+
         this.setLayout(new BorderLayout());
         this.add(openButton, BorderLayout.NORTH);
+        this.add(writeTokens2Json, BorderLayout.SOUTH);
         this.add(scrollPane, BorderLayout.CENTER);
-        this.setSize(600, 400);
+        this.setSize(700, 500);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
     }

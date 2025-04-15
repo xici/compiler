@@ -7,6 +7,6 @@ import javax.swing.SwingUtilities;
 public class Main {
     public static void main(String[] args) {
         FlatLightLaf.setup();
-        SwingUtilities.invokeLater(() -> new LexerGUI().setVisible(true)); // 异步启动
+        new LexerGUI().setVisible(true);
     }
 }
