@@ -205,21 +205,18 @@ public class Lexer {
         StringBuilder sb = new StringBuilder();
         int tokenLine = line;
         int tokenColumn = column;
-        boolean hasDecimal = false;
         while (currentChar != -1 && Character.isDigit(currentChar)) {
             sb.append((char) currentChar);
             advance();
         }
         if (currentChar == '.') {
             sb.append('.');
-            hasDecimal = true;
             advance();
             if (currentChar != -1 && Character.isDigit(currentChar)) {
                 while (currentChar != -1 && Character.isDigit(currentChar)) {
                     sb.append((char) currentChar);
                     advance();
                 }
-            } else {
             }
         }
         return new Token(TokenType.NUMBER, sb.toString(), tokenLine, tokenColumn);
